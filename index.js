@@ -1,28 +1,33 @@
 require('dotenv').config();
 
 const express = require('express');
+const bodyParser = require('body-parser');
 const request = require('request');
 
 const app = express();
 const API_URL = 'https://vrt-api-app.herokuapp.com/';
 
-app.use((req, res, next) => {
+app.all('*', (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", req.header('access-control-request-headers'));
-    next();
-});
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE');
+    res.header('Access-Control-Allow', req.header('access-control-request-headers'));
 
-app.get('/api/blokken', (req, res) => {
-    request(
-        { url: `${API_URL}` },
-        (error, response, body) => {
-            if(error || response.statusCode !== 200) {
-                return res.status(500).json({type: 'error', message: error.message});
-            }
-            res.json(JSON.parse(body));
+    if(req.method === 'OPTIONS') {
+        res.send();
+    } else {
+        const targetURL = req.header('https://vrt-api-app.herokuapp.com/');
+        if(!targetURL) {
+            res.send(500, { error: 'There is no Target-Endpoint header in the request' });
+            return;
         }
-    );
+
+        request({ url: targetURL + req.url, method: req.method, json: req.body, headers: {'Authorization': req.header('Authorization')} },
+        function (error, response, body) {
+            if (error) {
+                console.error('error: ' + response.statusCode)
+            }
+        }).pipe(res);
+    }
 });
 
 const PORT = process.env.PORT || 5001;
