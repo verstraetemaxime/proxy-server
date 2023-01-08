@@ -1,27 +1,27 @@
 require('dotenv').config();
 
 const express = require('express');
-const mongoose = require('mongoose');
-const mongoString = process.env.MONGO_URI;
-const routes = require('./routes/routes');
-
-mongoose.connect(mongoString);
-const db = mongoose.connection;
-
-db.on('error', (error) => {
-    console.log(error);
-});
-
-db.once('connected', () => {
-    console.log('Database connected');
-});
+const request = require('request');
 
 const app = express();
+const API_URL = 'https://vrt-api-app.herokuapp.com/';
 
-app.use(express.json());
-
-app.use('/api', routes);
-
-app.listen(3000, () => {
-    console.log(`Server started at ${3000}`);
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
 });
+
+app.get('/api/blokken', (req, res) => {
+    request(
+        { url: `${API_URL}` },
+        (error, response, body) => {
+            if(error || response.statusCode !== 200) {
+                return res.status(500).json({type: 'error', message: error.message});
+            }
+            res.json(JSON.parse(body));
+        }
+    );
+});
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`listening on ${PORT}`));
