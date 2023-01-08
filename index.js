@@ -20,7 +20,7 @@ app.all('*', (req, res, next) => {
     if(req.method === 'OPTIONS') {
         res.send();
     } else {
-        const targetURL = req.header('https://vrt-api-app.herokuapp.com/');
+        const targetURL = req.header('https://vrt-api-app.herokuapp.com/api/blokken');
         if(!targetURL) {
             res.send(500, { error: 'There is no Target-Endpoint header in the request' });
             return;
