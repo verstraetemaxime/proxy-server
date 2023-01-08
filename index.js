@@ -7,6 +7,11 @@ const request = require('request');
 const app = express();
 const API_URL = 'https://vrt-api-app.herokuapp.com/';
 
+const myLimit = typeof(process.argv[2]) != 'undefined' ? process.argv[2] : '100kb';
+console.log('Using limit: ', myLimit);
+
+app.use(bodyParser.json({limit: myLimit}));
+
 app.all('*', (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE');
